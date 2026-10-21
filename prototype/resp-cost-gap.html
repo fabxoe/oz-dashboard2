@@ -61,12 +61,24 @@ select:focus-visible, .seg button:focus-visible { outline: 2px solid var(--accen
 .seg button:last-child { border-radius: 0 6px 6px 0; border-left: 0; }
 .seg button[aria-pressed="true"] { background: var(--accent); color: var(--surface); border-color: var(--accent); }
 
-.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
-.kpi { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.brand { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; font-size: 13px; color: var(--muted); }
+.brand .mark { width: 26px; height: 26px; border-radius: 6px; background: var(--accent); color: var(--surface); display: grid; place-items: center; font-weight: 700; font-size: 14px; }
+.brand b { color: var(--fg); font-weight: 700; }
+.brand .stamp { margin-left: auto; font-family: var(--font-num); font-size: 12px; }
+.finding { font-size: 15px; font-weight: 500; max-width: 70ch; text-wrap: pretty; }
+.finding em { font-style: normal; color: var(--accent); font-weight: 700; }
+.kpis { display: grid; grid-template-columns: 1.6fr 1fr 1fr 1fr; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; }
+.kpi { padding: 16px 18px; display: flex; flex-direction: column; gap: 2px; min-width: 0; border-left: 1px solid var(--line); }
+.kpi:first-child { border-left: 0; }
 .kpi .l { font-size: 12px; color: var(--muted); }
-.kpi .v { font-family: var(--font-num); font-size: 26px; font-weight: 500; font-variant-numeric: tabular-nums; }
+.kpi .v { font-family: var(--font-num); font-size: 22px; font-weight: 500; font-variant-numeric: tabular-nums; }
 .kpi .d { font-size: 12px; color: var(--muted); }
-.kpi.key { border-color: var(--accent); background: var(--accent-soft); }
+.kpi.lead .v { font-size: 36px; font-weight: 500; color: var(--accent); }
+@media (max-width: 760px) {
+  .kpis { grid-template-columns: 1fr 1fr; }
+  .kpi.lead { grid-column: 1 / -1; border-bottom: 1px solid var(--line); }
+  .kpi:nth-child(3) { border-left: 0; }
+}
 .pill { display: inline-block; font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 99px; background: var(--warn-soft); color: var(--warn); }
 
 .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 16px; }
@@ -101,9 +113,16 @@ svg text { fill: var(--muted); font-size: 11px; font-family: var(--font-num); }
 <div class="wrap">
   <div class="proto">프로토타입입니다. 화면에 보이는 숫자는 모양을 보여주기 위한 가짜 예시 값이고, 실제 청구 데이터가 아닙니다.</div>
 
+  <div class="brand">
+    <span class="mark" aria-hidden="true">호</span>
+    <span><b>보건의료 청구 분석</b> · 식약처 보건의료분석담당</span>
+    <span class="stamp">2026-10-06 기준 · 예시 값</span>
+  </div>
+
   <div class="top">
-    <div>
+    <div style="display:flex;flex-direction:column;gap:6px">
       <h1>감염성 호흡기 질환 진료비 격차</h1>
+      <p class="finding" id="finding"></p>
       <p class="sub">주상병 J00~J22 · 소득 대리변수는 건강보험료 5분위(5가 고소득) · 월 단위 갱신</p>
     </div>
     <div class="filters">
@@ -202,15 +221,18 @@ svg text { fill: var(--muted); font-size: 11px; font-family: var(--font-num); }
     classes.forEach(function (c, i) { for (var q = 0; q < 5; q++) { all += c.b * mult[q] * cnt[i][q]; w += cnt[i][q]; } });
     var total = w;
     var items = [
-      { l: '건당 총진료비 (전체)', v: fmt(val(all / w)) + '원', d: '전월 대비 +1.8%', key: true },
-      { l: '5분위 ÷ 1분위', v: (q5 / q1).toFixed(2) + '배', d: '고소득이 ' + fmt(q5 - q1) + '원 더 높음', tag: '격차' },
+      { l: '소득 격차: 5분위 ÷ 1분위', v: (q5 / q1).toFixed(2) + '배', d: '고소득이 건당 ' + fmt(q5 - q1) + '원 더 높음', lead: true },
+      { l: '건당 총진료비 (전체)', v: fmt(val(all / w)) + '원', d: '전월 대비 +1.8%' },
       { l: '종별 최고 ÷ 최저', v: (val(cMean(0)) / val(cMean(3))).toFixed(1) + '배', d: '상급종합 vs 의원' },
       { l: '대상 명세서', v: fmt(total) + '건', d: '주상병 J00~J22' }
     ];
     document.getElementById('kpis').innerHTML = items.map(function (k) {
-      return '<div class="kpi' + (k.key ? ' key' : '') + '"><span class="l">' + k.l + '</span><span class="v">' + k.v +
-        '</span><span class="d">' + k.d + (k.tag ? ' <span class="pill">' + k.tag + '</span>' : '') + '</span></div>';
+      return '<div class="kpi' + (k.lead ? ' lead' : '') + '"><span class="l">' + k.l + '</span><span class="v">' + k.v +
+        '</span><span class="d">' + k.d + '</span></div>';
     }).join('');
+    var top = classes[0], topGap = top.b * (mult[4] - mult[0]) * (stat === 'mean' ? 1 : med);
+    document.getElementById('finding').innerHTML = '고소득(5분위)의 건당 총진료비가 저소득(1분위)보다 <em>' + Math.round((q5 / q1 - 1) * 100) +
+      '% 높고</em>, 금액 차이는 ' + top.n + '에서 가장 큽니다(건당 ' + fmt(topGap) + '원).';
   }
 
   function heat() {

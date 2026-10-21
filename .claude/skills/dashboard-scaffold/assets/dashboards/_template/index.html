@@ -8,10 +8,19 @@
 </head>
 <body>
   <main>
-    <p><a href="../../">← 목록</a></p>
-    <h1>대시보드 제목</h1>
-    <section class="cards" id="cards"></section>
+    <div class="brand">
+      <span class="mark" aria-hidden="true">·</span>
+      <span><b>제품 이름</b> · 담당 부서나 범위</span>
+      <span class="stamp" id="stamp">데이터 기준일</span>
+    </div>
+    <div>
+      <h1>대시보드 제목</h1>
+      <p class="finding" id="finding"></p>
+      <p class="sub">대상, 기준, 갱신 주기</p>
+    </div>
+    <section class="kpis" id="kpis" aria-label="핵심 수치"></section>
     <section id="charts"></section>
+    <p><a href="../../">← 목록</a></p>
   </main>
   <script type="module" src="main.js"></script>
 </body>
