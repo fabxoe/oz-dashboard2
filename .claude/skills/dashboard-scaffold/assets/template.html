@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>호흡기 진료비 격차</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/wanteddev/wanted-sans@v1.0.3/packages/wanted-sans/fonts/webfonts/variable/split/WantedSansVariable.min.css">
+<style>
+/* Montage(Wanted 디자인 시스템, MIT) 토큰. 출처: wanteddev/montage-web packages/theme semantic light/dark */
+:root {
+  --bg: #F7F7F8; --surface: #FFFFFF; --fg: #171719; --muted: rgba(55,56,60,.61); --line: #E1E2E4;
+  --accent: #0066FF; --accent-2: #9EC5FF; --warn: #D47800; --warn-soft: rgba(255,146,0,.08);
+  --track: rgba(112,115,128,.08);
+  --radius-card: 12px; --radius-ctl: 8px;
+  --font-body: "Wanted Sans Variable", "Wanted Sans", -apple-system, BlinkMacSystemFont, system-ui, "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #0F0F10; --surface: #1B1C1E; --fg: #F7F7F8; --muted: rgba(174,176,182,.61); --line: #333438;
+    --accent: #3385FF; --accent-2: #003E9C; --warn: #FFA938; --warn-soft: rgba(255,169,56,.08); --track: rgba(112,115,128,.22); color-scheme: dark; }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 14px; line-height: 20px; font-variant-numeric: tabular-nums; }
+main { max-width: 1120px; margin: 0 auto; padding: 24px 16px 48px; display: flex; flex-direction: column; gap: 16px; }
+h1 { font-size: 24px; line-height: 32px; font-weight: 700; letter-spacing: -0.023em; margin: 0; }
+h2 { font-size: 16px; line-height: 24px; font-weight: 600; margin: 0; }
+p { margin: 0; }
+.sub { color: var(--muted); font-size: 13px; line-height: 18px; }
+
+.brand { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; font-size: 13px; color: var(--muted); }
+.mark { width: 26px; height: 26px; border-radius: var(--radius-ctl); background: var(--accent); color: var(--surface); display: grid; place-items: center; font-weight: 700; font-size: 14px; }
+.brand b { color: var(--fg); font-weight: 700; }
+.stamp { margin-left: auto; font-size: 12px; }
+.finding { font-size: 16px; line-height: 24px; font-weight: 500; max-width: 74ch; text-wrap: pretty; }
+.finding em { font-style: normal; color: var(--accent); font-weight: 700; }
+
+.kpis { display: grid; grid-template-columns: 1.6fr repeat(3, 1fr); border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--surface); }
+.kpi { padding: 16px 18px; display: flex; flex-direction: column; gap: 2px; min-width: 0; border-left: 1px solid var(--line); }
+.kpi:first-child { border-left: 0; }
+.kpi .l { font-size: 12px; color: var(--muted); }
+.kpi .v { font-size: 22px; line-height: 30px; font-weight: 600; letter-spacing: -0.019em; }
+.kpi .d { font-size: 12px; color: var(--muted); }
+.kpi.lead .v { font-size: 36px; line-height: 44px; font-weight: 700; letter-spacing: -0.027em; color: var(--accent); }
+
+.grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 16px; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-card); padding: 16px 18px; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.note { font-size: 12px; line-height: 16px; color: var(--muted); }
+.cap { font-size: 13px; font-weight: 600; color: var(--accent); }
+
+/* range: 가로 구간 막대 */
+.rng { display: grid; grid-template-columns: 96px minmax(0, 1fr) 72px; gap: 10px 12px; align-items: center; font-size: 13px; }
+.rng .plot { position: relative; height: 22px; }
+.rng .plot::before { content: ""; position: absolute; inset: 9px 0 9px 0; background: var(--track); border-radius: 2px; }
+.rng .bar { position: absolute; top: 4px; height: 14px; border-radius: 3px; background: var(--accent-2); }
+.rng .dot { position: absolute; top: 2px; width: 4px; height: 18px; border-radius: 2px; background: var(--accent); margin-left: -2px; }
+.rng .val { font-weight: 600; }
+.rng .n { text-align: right; color: var(--muted); font-size: 12px; }
+.axis { display: grid; grid-template-columns: 96px minmax(0, 1fr) 72px; gap: 12px; font-size: 11px; color: var(--muted); line-height: 14px; }
+.axis .ticks { position: relative; height: 14px; }
+.axis .ticks span { position: absolute; transform: translateX(-50%); }
+.axis .ticks span:first-child { transform: none; } .axis .ticks span:last-child { transform: translateX(-100%); }
+
+/* matrix */
+.scroll { overflow-x: auto; }
+.mx { display: grid; grid-template-columns: 104px repeat(5, minmax(84px, 1fr)) 92px; gap: 4px; min-width: 640px; font-size: 13px; }
+.mx .h { color: var(--muted); font-size: 12px; text-align: center; padding: 2px 0 6px; }
+.mx .rl { display: flex; align-items: center; font-weight: 500; }
+.cell { border: 1px solid var(--line); border-radius: 6px; padding: 8px 4px; text-align: center; font-weight: 600; }
+.cell small { display: block; font-weight: 400; font-size: 11px; color: var(--muted); }
+.cell.low { background-image: repeating-linear-gradient(135deg, transparent 0 5px, var(--warn-soft) 5px 7px); border-style: dashed; border-color: var(--warn); }
+.mx .sp { display: flex; flex-direction: column; justify-content: center; text-align: center; font-size: 12px; color: var(--muted); }
+.mx .sp b { color: var(--fg); font-size: 13px; }
+
+/* bar */
+.bars { display: flex; flex-direction: column; gap: 10px; }
+.br { display: grid; grid-template-columns: 56px minmax(0, 1fr) 64px; gap: 12px; align-items: center; font-size: 13px; }
+.br .t { height: 20px; background: var(--track); border-radius: 3px; position: relative; }
+.br .f { position: absolute; inset: 0 auto 0 0; background: var(--accent); border-radius: 3px; }
+.br .v { font-weight: 600; text-align: right; }
+.br .n { grid-column: 2 / 4; font-size: 11px; color: var(--muted); margin-top: -6px; }
+
+/* diverge */
+.dv { display: grid; grid-template-columns: 120px minmax(0, 1fr) 60px 70px; gap: 6px 12px; align-items: center; font-size: 13px; }
+.dv .t { position: relative; height: 16px; }
+.dv .t::before { content: ""; position: absolute; left: 50%; top: 0; bottom: 0; width: 1px; background: var(--line); }
+.dv .f { position: absolute; top: 2px; bottom: 2px; background: var(--accent-2); border-radius: 2px; }
+.dv .f.pos { background: var(--accent); }
+.dv .v { text-align: right; font-weight: 600; }
+.dv .n { text-align: right; color: var(--muted); font-size: 12px; }
+
+/* table */
+.tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
+.tbl td:first-child { white-space: nowrap; }
+.tbl th { font-weight: 500; font-size: 12px; color: var(--muted); padding: 6px 8px; border-bottom: 1px solid var(--line); text-align: left; white-space: nowrap; }
+.tbl td { padding: 8px; border-bottom: 1px solid var(--line); }
+.tbl .r { text-align: right; }
+.tbl tr:last-child td { border-bottom: 0; }
+
+svg text { fill: var(--muted); font-size: 11px; font-family: var(--font-body); }
+
+@media (max-width: 760px) {
+  .kpis { grid-template-columns: 1fr 1fr; }
+  .kpi.lead { grid-column: 1 / -1; border-bottom: 1px solid var(--line); }
+  .kpi:nth-child(3) { border-left: 0; }
+  .grid > .panel { grid-column: 1 / -1 !important; }
+  .stamp { margin-left: 0; }
+  .rng, .axis { grid-template-columns: 76px minmax(0, 1fr) 56px; }
+  .dv { grid-template-columns: 96px minmax(0, 1fr) 52px 54px; }
+}
+</style>
+</head>
+<body>
+<main id="app"></main>
+<script>
+var METRICS = /*__METRICS__*/[];
+var fmt = function (n) { return Math.round(n).toLocaleString('ko-KR'); };
+var el = function (h) { var d = document.createElement('div'); d.innerHTML = h.trim(); return d.firstChild; };
+
+function niceMax(v) {
+  var p = Math.pow(10, Math.floor(Math.log10(v))), s = [1, 2, 3, 4, 5, 6, 8, 10];
+  for (var i = 0; i < s.length; i++) { if (s[i] * p >= v) return s[i] * p; }
+  return 10 * p;
+}
+
+var R = {
+  range: function (d) {
+    var max = niceMax(Math.max.apply(null, d.hi) * 1.05);
+    var pct = function (v) { return (v / max * 100).toFixed(2); };
+    var rows = d.labels.map(function (l, i) {
+      return '<span>' + l + '</span><div class="plot"><div class="bar" style="left:' + pct(d.lo[i]) + '%;width:' + (pct(d.hi[i]) - pct(d.lo[i])).toFixed(2) + '%"></div><div class="dot" style="left:' + pct(d.mid[i]) + '%"></div></div>' +
+        '<span class="val">' + fmt(d.mid[i]) + d.suffix + '</span>' +
+        '<span></span><span class="n" style="grid-column:2/4;text-align:left;margin-top:-6px">' + fmt(d.lo[i]) + '~' + fmt(d.hi[i]) + ' · n=' + fmt(d.n[i]) + '</span>';
+    }).join('');
+    var ticks = [0, .5, 1].map(function (f) { return '<span style="left:' + f * 100 + '%">' + fmt(max * f) + '</span>'; }).join('');
+    return '<div class="rng">' + rows + '</div><div class="axis"><span></span><div class="ticks">' + ticks + '</div><span></span></div>';
+  },
+  matrix: function (d) {
+    var h = '<div></div>' + d.cols.map(function (c) { return '<div class="h">' + c + '</div>'; }).join('') + '<div class="h">행 내 차이</div>';
+    d.rows.forEach(function (r, i) {
+      h += '<div class="rl">' + r + '</div>';
+      var ok = d.cells[i].filter(function (c) { return !c.low && c.v != null; }).map(function (c) { return c.v; });
+      d.cells[i].forEach(function (c) {
+        h += '<div class="cell' + (c.low ? ' low' : '') + '">' + (c.v == null ? '–' : fmt(c.v)) + '<small>' + (c.low ? '표본 부족 ' : '') + 'n=' + fmt(c.n) + '</small></div>';
+      });
+      var mn = Math.min.apply(null, ok), mx = Math.max.apply(null, ok);
+      h += '<div class="sp"><b>' + ((mx - mn) / ((mx + mn) / 2) * 100).toFixed(0) + '%</b>최고−최저</div>';
+    });
+    return '<div class="scroll"><div class="mx">' + h + '</div></div>';
+  },
+  bar: function (d) {
+    var max = d.max || niceMax(Math.max.apply(null, d.values) * 1.1);
+    var rows = d.labels.map(function (l, i) {
+      return '<div class="br"><span>' + l + '</span><div class="t"><div class="f" style="width:' + (d.values[i] / max * 100).toFixed(1) + '%"></div></div><span class="v">' + d.values[i].toLocaleString('ko-KR') + d.suffix + '</span>' +
+        (d.n ? '<span class="n">n=' + fmt(d.n[i]) + '</span>' : '') + '</div>';
+    }).join('');
+    return (d.caption ? '<p class="cap">' + d.caption + '</p>' : '') + '<div class="bars">' + rows + '</div>';
+  },
+  diverge: function (d) {
+    var m = Math.max.apply(null, d.values.map(Math.abs)) * 1.1;
+    var rows = d.labels.map(function (l, i) {
+      var v = d.values[i], w = Math.abs(v) / m * 50;
+      return '<span>' + l.replace('특별자치도', '').replace('특별자치시', '').replace('특별시', '').replace('광역시', '') + '</span><div class="t"><div class="f' + (v > 0 ? ' pos' : '') + '" style="' + (v >= 0 ? 'left:50%' : 'right:50%') + ';width:' + w.toFixed(1) + '%"></div></div>' +
+        '<span class="v">' + (v > 0 ? '+' : '') + v.toFixed(1) + '%</span><span class="n">n=' + fmt(d.n[i]) + '</span>';
+    }).join('');
+    return '<p class="cap">전국 중앙값 ' + fmt(d.ref) + '원 = 0%</p><div class="dv">' + rows + '</div>';
+  },
+  monthly: function (d) {
+    var W = 1040, L = 48, Rr = 8, n = d.labels.length, bw = (W - L - Rr) / n;
+    var cmax = niceMax(Math.max.apply(null, d.count)), mmax = niceMax(Math.max.apply(null, d.median) * 1.1);
+    function panel(vals, max, top, h, kind, unit) {
+      var o = '';
+      for (var g = 0; g <= 2; g++) {
+        var y = top + h - h * g / 2;
+        o += '<line x1="' + L + '" x2="' + (W - Rr) + '" y1="' + y + '" y2="' + y + '" stroke="var(--line)"/><text x="' + (L - 6) + '" y="' + (y + 4) + '" text-anchor="end">' + fmt(max * g / 2) + '</text>';
+      }
+      if (kind === 'bar') {
+        vals.forEach(function (v, i) { var bh = v / max * h; o += '<rect x="' + (L + i * bw + 2) + '" y="' + (top + h - bh) + '" width="' + (bw - 4) + '" height="' + bh + '" fill="var(--accent-2)"/>'; });
+      } else {
+        o += '<path fill="none" stroke="var(--accent)" stroke-width="2" d="' + vals.map(function (v, i) { return (i ? 'L' : 'M') + (L + i * bw + bw / 2).toFixed(1) + ' ' + (top + h - v / max * h).toFixed(1); }).join('') + '"/>';
+      }
+      return o + '<text x="' + L + '" y="' + (top - 6) + '" style="fill:var(--fg);font-weight:600">' + unit + '</text>';
+    }
+    var o = panel(d.count, cmax, 22, 110, 'bar', '명세서 수 (건)') + panel(d.median, mmax, 190, 90, 'line', '건당 중앙값 (원)');
+    d.labels.forEach(function (l, i) { if (l.slice(5) === '01' || l.slice(5) === '07') o += '<text x="' + (L + i * bw + bw / 2) + '" y="302" text-anchor="middle">' + l + '</text>'; });
+    return '<svg viewBox="0 0 ' + W + ' 312" width="100%" role="img" aria-label="월별 명세서 수와 건당 중앙값">' + o + '</svg>';
+  },
+  table: function (d) {
+    var al = d.align || [];
+    var th = '<tr>' + d.columns.map(function (c, i) { return '<th class="' + (al[i] ? 'r' : '') + '">' + c + '</th>'; }).join('') + '</tr>';
+    var tb = d.rows.map(function (r) { return '<tr>' + r.map(function (c, i) { return '<td class="' + (al[i] ? 'r' : '') + '">' + c + '</td>'; }).join('') + '</tr>'; }).join('');
+    return '<div class="scroll"><table class="tbl">' + th + tb + '</table></div>';
+  }
+};
+
+var app = document.getElementById('app');
+var head = METRICS.filter(function (m) { return m.chart === 'headline'; })[0];
+if (head) {
+  var d = head.data;
+  app.appendChild(el('<div class="brand"><span class="mark" aria-hidden="true">호</span><span><b>보건의료 청구 분석</b> · 식약처 보건의료분석담당</span><span class="stamp">' + d.stamp + ' · 진료 ' + d.period + '</span></div>'));
+  app.appendChild(el('<div style="display:flex;flex-direction:column;gap:6px"><h1>감염성 호흡기 질환 진료비 격차</h1><p class="finding">' + d.finding + '</p><p class="sub">외래(031) 명세서 · 주상병 J00~J99 · 건당 총진료비의 중앙값 · 실습 데이터(OZ 코딩 SQL 3기)</p></div>'));
+  app.appendChild(el('<section class="kpis" aria-label="핵심 수치">' + d.kpis.map(function (k) {
+    return '<div class="kpi' + (k.lead ? ' lead' : '') + '"><span class="l">' + k.label + '</span><span class="v">' + k.value + '</span><span class="d">' + k.note + '</span></div>';
+  }).join('') + '</section>'));
+}
+var grid = el('<div class="grid"></div>');
+METRICS.forEach(function (m) {
+  if (!R[m.chart]) return;
+  grid.appendChild(el('<section class="panel" style="grid-column:span ' + m.span + '"><h2>' + m.question + '</h2>' + R[m.chart](m.data) + (m.note ? '<p class="note">' + m.note + '</p>' : '') + '</section>'));
+});
+app.appendChild(grid);
+app.appendChild(el('<p class="note">소득은 건강보험료 5분위(5가 고소득)이고 사업소득 등은 반영하지 못합니다. 기관은 이름 없이 종별과 권역으로만 구분되고, 이 자료는 실습용 데이터라 실제 분포와 다를 수 있습니다. 기관 단위 분석은 표본이 부족합니다.</p>'));
+</script>
+</body>
+</html>
