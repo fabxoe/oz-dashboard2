@@ -11,3 +11,7 @@
 ## 대시보드
 
 (목록은 `index.html`)
+
+## 디자인 시스템
+
+색, 반경, 글꼴은 Wanted의 [Montage](https://github.com/wanteddev/montage-web)(MIT) 토큰을 따른다. 글꼴은 Wanted Sans(jsDelivr), 없으면 Noto Sans KR. 토큰은 `shared/style.css` 맨 위 `:root`에 모여 있다.

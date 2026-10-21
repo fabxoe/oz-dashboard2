@@ -1,23 +1,27 @@
+/* Montage(Wanted 디자인 시스템, MIT) 토큰. 출처: wanteddev/montage-web packages/theme semantic light/dark */
 :root {
-  --bg: #ffffff;
-  --fg: #1a1a1a;
-  --muted: #666666;
-  --line: #e2e2e2;
-  --surface: #ffffff;
-  --accent: #2563eb;
+  --bg: #F7F7F8;
+  --surface: #FFFFFF;
+  --fg: #171719;
+  --muted: rgba(55,56,60,.61);
+  --line: #E1E2E4;
+  --accent: #0066FF;
+  --radius-card: 12px;
+  --radius-ctl: 8px;
+  --font-body: "Wanted Sans Variable", "Wanted Sans", -apple-system, BlinkMacSystemFont, system-ui, "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif;
 }
 @media (prefers-color-scheme: dark) {
-  :root { --bg: #121212; --fg: #eeeeee; --muted: #999999; --line: #2e2e2e; --surface: #1a1a1a; --accent: #60a5fa; }
+  :root { --bg: #0F0F10; --surface: #1B1C1E; --fg: #F7F7F8; --muted: rgba(174,176,182,.61); --line: #333438; --accent: #3385FF; }
 }
-body { margin: 0; background: var(--bg); color: var(--fg); font-family: system-ui, sans-serif; }
+body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--font-body); font-variant-numeric: tabular-nums; }
 main { max-width: 1100px; margin: 0 auto; padding: 24px 16px; display: flex; flex-direction: column; gap: 16px; }
 a { color: var(--accent); }
-h1 { font-size: 22px; margin: 0; }
+h1 { font-size: 24px; line-height: 32px; font-weight: 700; letter-spacing: -0.023em; margin: 0; }
 .sub { color: var(--muted); font-size: 13px; margin: 0; }
 
 /* 제품 표식: 이름, 범위, 갱신 시점 한 줄 */
 .brand { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; font-size: 13px; color: var(--muted); }
-.brand .mark { width: 26px; height: 26px; border-radius: 6px; background: var(--accent); color: var(--surface); display: grid; place-items: center; font-weight: 700; }
+.brand .mark { width: 26px; height: 26px; border-radius: var(--radius-ctl); background: var(--accent); color: var(--surface); display: grid; place-items: center; font-weight: 700; }
 .brand b { color: var(--fg); }
 .brand .stamp { margin-left: auto; font-size: 12px; }
 
@@ -26,13 +30,13 @@ h1 { font-size: 22px; margin: 0; }
 .finding em { font-style: normal; color: var(--accent); font-weight: 700; }
 
 /* 숫자 띠: 한 칸을 선으로 나눈다. 첫 칸(.lead)이 화면의 질문에 답하는 가장 큰 숫자 */
-.kpis { display: grid; grid-template-columns: 1.6fr repeat(3, 1fr); border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+.kpis { display: grid; grid-template-columns: 1.6fr repeat(3, 1fr); border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--surface); }
 .kpi { padding: 16px 18px; display: flex; flex-direction: column; gap: 2px; min-width: 0; border-left: 1px solid var(--line); }
 .kpi:first-child { border-left: 0; }
 .kpi .l { font-size: 12px; color: var(--muted); }
-.kpi .v { font-size: 22px; font-variant-numeric: tabular-nums; }
+.kpi .v { font-size: 22px; font-weight: 600; letter-spacing: -0.019em; font-variant-numeric: tabular-nums; }
 .kpi .d { font-size: 12px; color: var(--muted); }
-.kpi.lead .v { font-size: 36px; color: var(--accent); }
+.kpi.lead .v { font-size: 36px; font-weight: 700; letter-spacing: -0.027em; color: var(--accent); }
 @media (max-width: 760px) {
   .kpis { grid-template-columns: 1fr 1fr; }
   .kpi.lead { grid-column: 1 / -1; border-bottom: 1px solid var(--line); }
